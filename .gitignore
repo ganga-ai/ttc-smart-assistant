@@ -1,0 +1,4 @@
+.secrets
+ttc_env/
+__pycache__
+*.pyc
