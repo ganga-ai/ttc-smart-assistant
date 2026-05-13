@@ -9,6 +9,15 @@ from backend.api.ttc_api import get_next_arrivals
 from backend.rag.retriever import ask_ttc_question
 from backend.router.assistant import smart_ttc_assistant
 
+user_api_key = st.sidebar.text_input(
+    "Optional OpenAI API Key",
+    type="password"
+)
+
+st.sidebar.caption(
+    "Smart TTC Assistant requires an OpenAI API key. Basic TTC features remain public."
+)
+
 page = st.sidebar.selectbox(
     "Choose Service",
     ["Real-Time Arrivals", "Ask TTC Questions","Smart TTC Assistant"]
@@ -51,7 +60,7 @@ elif page == "Smart TTC Assistant":
 
     if st.button("Ask Assistant", key="assistant_btn"):
         if user_input:
-            response = smart_ttc_assistant(user_input)
+            response = smart_ttc_assistant(user_input, user_api_key)
 
             if isinstance(response, dict):
                 st.write(response["answer"])

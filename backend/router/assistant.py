@@ -1,21 +1,7 @@
-import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
 from backend.config.settings import client_openai
-
-# Loading API key from secret.
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# dotenv_path = os.path.join(BASE_DIR, ".secrets")
-# load_dotenv(dotenv_path, override=True)
-# API_KEY = os.getenv("API_GATEWAY_KEY")
-
-# # Creating an OpenAI client.
-# client = OpenAI(
-#     base_url = "https://k7uffyg03f.execute-api.us-east-1.amazonaws.com/prod/openai/v1",
-#     api_key = os.getenv("API_GATEWAY_KEY"),
-#     default_headers = {"x-api-key": os.getenv("API_GATEWAY_KEY")}
-# )
 
 from backend.api.ttc_api import get_next_arrivals
 from backend.rag.retriever import ask_ttc_question
@@ -77,12 +63,16 @@ def is_restricted(query: str) -> bool:
 
     return False
 
-def smart_ttc_assistant(user_input: str) -> str:
+def smart_ttc_assistant(user_input: str, user_api_key=None) -> str:
     if is_restricted(user_input):
         return "Sorry, I can’t help with that request."
+    
+    if not user_api_key:
+        client = OpenAI(api_key=user_api_key)
+        #return "Please enter your OpenAI API key in the sidebar to use Smart TTC Assistant."
      
     try:
-        response = client_openai.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
@@ -120,9 +110,7 @@ def smart_ttc_assistant(user_input: str) -> str:
 
             function_name = tool_call.function.name
             arguments = json.loads(tool_call.function.arguments)
-            # print("FUNCTION:", function_name)
-            # print("ARGUMENTS:", arguments)
-
+            
             if function_name not in ["get_next_arrivals", "ask_ttc_question"]:
                 return "Invalid request."
 
