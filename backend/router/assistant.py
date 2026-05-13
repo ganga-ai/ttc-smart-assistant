@@ -67,9 +67,13 @@ def smart_ttc_assistant(user_input: str, user_api_key=None) -> str:
     if is_restricted(user_input):
         return "Sorry, I can’t help with that request."
     
-    if not user_api_key:
-        client = OpenAI(api_key=user_api_key)
-        #return "Please enter your OpenAI API key in the sidebar to use Smart TTC Assistant."
+    if not user_api_key or not user_api_key.strip():
+        return {
+            "answer": "Please enter your OpenAI API key in the sidebar to use Smart TTC Assistant.",
+            "source": "authentication"
+        }
+    
+    client = OpenAI(api_key=user_api_key)
      
     try:
         response = client.chat.completions.create(
