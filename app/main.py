@@ -1,11 +1,13 @@
 import sys, os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, ROOT_DIR)
+
 import streamlit as st
+
 from backend.api.ttc_api import get_next_arrivals
 from backend.rag.retriever import ask_ttc_question
 from backend.router.assistant import smart_ttc_assistant
-
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-#sys.path.append(ROOT_DIR)
 
 page = st.sidebar.selectbox(
     "Choose Service",

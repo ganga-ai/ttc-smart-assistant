@@ -5,24 +5,6 @@ BASE_URL = "https://retro.umoiq.com/service/publicXMLFeed"
 
 from backend.config.settings import client_openai
 
-# import os
-# from openai import OpenAI
-# from dotenv import load_dotenv
-
-# # Loading API key from secret.
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# dotenv_path = os.path.join(BASE_DIR, ".secrets")
-# load_dotenv(dotenv_path, override=True)
-# API_KEY = os.getenv("API_GATEWAY_KEY")
-
-# # Creating an OpenAI client.
-# client = OpenAI(
-#     base_url = "https://k7uffyg03f.execute-api.us-east-1.amazonaws.com/prod/openai/v1",
-#     api_key = os.getenv("API_GATEWAY_KEY"),
-#     default_headers = {"x-api-key": os.getenv("API_GATEWAY_KEY")}
-# )
-
-
 def get_next_arrivals(stop_id: str) -> list[str]:
     try:
         params = {
@@ -38,8 +20,8 @@ def get_next_arrivals(stop_id: str) -> list[str]:
 
         root = ET.fromstring(response.text)
 
-        results = []
         structured_data = []
+        MAX_RESULTS = 3
 
         for predictions in root.findall("predictions"):
             route = predictions.get("routeTag")
@@ -49,6 +31,10 @@ def get_next_arrivals(stop_id: str) -> list[str]:
                 direction_title = direction.get("title")
 
                 for prediction in direction.findall("prediction"):
+
+                    if len(structured_data) >= MAX_RESULTS:
+                        return [summarize_arrivals(structured_data)]
+                    
                     minutes = prediction.get("minutes")
 
                     if route and minutes:
@@ -61,6 +47,7 @@ def get_next_arrivals(stop_id: str) -> list[str]:
 
                         structured_data.append({
                             "route": route,
+                            "route_title": route_title,
                             "minutes": minutes,
                             "direction": direction_title,
                             "status": status
@@ -70,8 +57,7 @@ def get_next_arrivals(stop_id: str) -> list[str]:
         if not structured_data:
             return ["No upcoming arrivals found."]
 
-        summary = summarize_arrivals(structured_data[:3])
-        return [summary]
+        return [summarize_arrivals(structured_data)]
 
     except Exception as e:
         return [f"Error fetching data: {e}"]
@@ -96,5 +82,5 @@ def summarize_arrivals(data: list[dict]) -> str:
 
         return response.choices[0].message.content.strip()
 
-    except Exception:
-        return "Could not generate summary."
+    except Exception as e:
+        return f"Could not generate summary: {e}"

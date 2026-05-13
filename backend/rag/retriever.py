@@ -1,25 +1,16 @@
 import os
 from openai import OpenAI
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 from backend.config.settings import client_openai
 
-# Loading API key from secret.
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# dotenv_path = os.path.join(BASE_DIR, ".secrets")
-# load_dotenv(dotenv_path, override=True)
-# API_KEY = os.getenv("API_GATEWAY_KEY")
-
-# # Creating an OpenAI client.
-# client_openai = OpenAI(
-#     base_url = "https://k7uffyg03f.execute-api.us-east-1.amazonaws.com/prod/openai/v1",
-#     api_key = os.getenv("API_GATEWAY_KEY"),
-#     default_headers = {"x-api-key": os.getenv("API_GATEWAY_KEY")}
-# )
-
 import chromadb
 
-client = chromadb.PersistentClient(path="./chroma_db")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+CHROMA_PATH = os.path.join(BASE_DIR, "data/chroma_db")
+
+client = chromadb.PersistentClient(path=CHROMA_PATH)
+
 collection = client.get_or_create_collection(name="ttc_docs")
 
 def ask_ttc_question(question: str) -> str:
@@ -29,6 +20,8 @@ def ask_ttc_question(question: str) -> str:
             model="text-embedding-3-small",
             input=[question]
         ).data[0].embedding
+
+       # print(collection.count())
 
         # 2. Retrieve top chunks
         results = collection.query(

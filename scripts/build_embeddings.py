@@ -1,12 +1,9 @@
 import os
-from openai import OpenAI
-from dotenv import load_dotenv
 
 from backend.config.settings import client_openai
 
 # Loading API key from secret.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 import chromadb
 
